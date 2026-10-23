@@ -225,6 +225,12 @@ if `now >= end_time` — once the stream has fully vested there is nothing
 unvested to refund. A stream that has already been cancelled cannot be
 cancelled again (`AlreadyCancelled`).
 
+For an existing stream, `cancel` first requires the sender's authorization,
+then checks whether the stream is cancelled and whether it has completed, in
+that order. The stream must be loaded before its sender is known, however, so
+an unknown id returns `StreamNotFound` before authorization is checked; the
+existence of a stream id is therefore not hidden from an unauthorized caller.
+
 ### Worked example: vesting schedule with a cliff
 
 This example uses a one-year stream with a three-month cliff — the shape
