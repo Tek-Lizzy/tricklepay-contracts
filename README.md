@@ -815,8 +815,10 @@ deploy so your client code matches the real signatures, not a stale copy.
 
 ### From a local build
 
-Build the optimised artifact with Rust 1.96.0, the compiler version pinned in
-`rust-toolchain.toml` and verified for the reproducible-build steps below:
+Build the optimised artifact with the Rust compiler version you intend to use.
+The reproducible-build instructions below were verified with Rust 1.96.0;
+`rust-toolchain.toml` selects the moving `stable` channel rather than pinning
+that exact version.
 
 ```bash
 cargo build --release --target wasm32v1-none
@@ -877,8 +879,8 @@ stellar contract info interface \
 ```
 
 The `stellar` binary used here is the [Stellar CLI](https://github.com/stellar/stellar-cli).
-The pinned toolchain in `rust-toolchain.toml` ensures the local artifact
-matches the one used during deployment when built on the same platform.
+To reproduce a deployment artifact, use the same exact Rust compiler version
+and target that were used to build the deployed WASM.
 
 ## Verifying a deployment
 
@@ -887,14 +889,19 @@ the on-chain bytecode hash with the hash produced by a local build.
 
 ### Step 1 — produce a reproducible local build
 
-The reproducible WASM build steps below have been verified with Rust 1.96.0,
-which is pinned in `rust-toolchain.toml`. Build with this compiler and the same
-toolchain version used for the deployed binary; do not override the project
-toolchain:
+The reproducible WASM build steps below were verified with Rust 1.96.0.
+`rust-toolchain.toml` selects the moving `stable` channel, so it does not
+ensure that a future local build uses the same compiler as a deployed binary.
+Check the deployed build's compiler version and use that exact version when
+comparing hashes. To reproduce the version used to verify these instructions,
+set the rustup toolchain override to Rust 1.96.0 for the hash build:
 
 ```bash
-make wasm-hash
+RUSTUP_TOOLCHAIN=1.96.0 make wasm-hash
 ```
+
+In PowerShell, set `$env:RUSTUP_TOOLCHAIN = "1.96.0"` before running
+`make wasm-hash`.
 
 This builds the optimised artifact with locked dependencies and prints its
 SHA-256 hash in a `sha256:`-prefixed format. The target supports `sha256sum`
@@ -938,7 +945,8 @@ sha256sum fetched.wasm
 ### Step 3 — compare
 
 If the hash from step 1 matches the `wasm_hash` from step 2, the live
-contract was compiled from this exact source tree with the pinned toolchain.
+contract has matching WASM bytecode. A matching hash is stronger evidence than
+the source or compiler metadata alone.
 
 The same comparison can be run with one command:
 
@@ -948,12 +956,11 @@ make verify-deployment CONTRACT_ID=C... NETWORK=testnet
 
 **Caveat — reproducibility:** Rust WASM builds are not guaranteed to be
 bit-for-bit reproducible across different host platforms, OS versions, or LLVM
-releases, even when the same toolchain version is used. In practice, the pinned
-toolchain in `rust-toolchain.toml` makes builds reproducible across Linux
-hosts; macOS or Windows hosts may produce a hash that differs from the deployed
-one even though the source is identical. If hashes do not match, try building
-on a Linux host (or a Docker image with the pinned Rust toolchain) before
-concluding that the deployment differs from the source.
+releases, even when the same toolchain version is used. `rust-toolchain.toml`
+selects the moving `stable` channel and does not pin either the compiler or the
+host environment. For best repeatability, use the compiler version from the
+deployment build on the same platform; if hashes do not match, also compare the
+host and LLVM versions before concluding that the source differs.
 
 ### Troubleshooting: wrong WASM build target
 
@@ -961,7 +968,7 @@ If deployment or `stellar contract install` fails with a `WasmVm` error about
 unsupported `reference-types` or `multi-value` features, the artifact was
 probably built for `wasm32-unknown-unknown`. That target is not accepted by
 the Soroban host for this project. Remove the wrong artifact and rebuild with
-the pinned target:
+the `wasm32v1-none` target:
 
 ```bash
 rm -f target/wasm32-unknown-unknown/release/tricklepay_stream.wasm
