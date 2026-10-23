@@ -815,8 +815,8 @@ deploy so your client code matches the real signatures, not a stale copy.
 
 ### From a local build
 
-Build the optimised artifact first (the toolchain is pinned in
-`rust-toolchain.toml`):
+Build the optimised artifact with Rust 1.96.0, the compiler version pinned in
+`rust-toolchain.toml` and verified for the reproducible-build steps below:
 
 ```bash
 cargo build --release --target wasm32v1-none
@@ -887,9 +887,10 @@ the on-chain bytecode hash with the hash produced by a local build.
 
 ### Step 1 — produce a reproducible local build
 
-The WASM artifact must be built with the same toolchain version that the
-deployed binary used. The pinned toolchain in `rust-toolchain.toml` ensures
-this, but only if you have not overridden it:
+The reproducible WASM build steps below have been verified with Rust 1.96.0,
+which is pinned in `rust-toolchain.toml`. Build with this compiler and the same
+toolchain version used for the deployed binary; do not override the project
+toolchain:
 
 ```bash
 make wasm-hash

@@ -18,9 +18,10 @@ repository and should be kept short rather than duplicating the shared guide.
 
 Prerequisites:
 
-- **Rust** with the pinned toolchain. The exact version and the `wasm32v1-none`
-  target are declared in `rust-toolchain.toml`; install the toolchain and target
-  with [rustup](https://rustup.rs).
+- **Rust 1.96.0** with the `wasm32v1-none` target. The exact version and target
+  are declared in `rust-toolchain.toml`; install the toolchain and target with
+  [rustup](https://rustup.rs). The reproducible WASM build instructions have
+  been verified with Rust 1.96.0.
 - **The [Stellar CLI](https://developers.stellar.org/docs/tools/cli)**, only
   needed if you deploy the contract to a network.
 
@@ -388,10 +389,9 @@ fixed schedule.
 A tag names a point in source history, **not** a deployed contract address —
 the two are linked only through the reproducible build:
 
-- The tagged commit, built with the pinned toolchain
-  (`rust-toolchain.toml`) targeting `wasm32v1-none`, produces one specific
-  WASM binary with one specific SHA-256 hash, deterministic for that source
-  and toolchain (see
+- The tagged commit, built with Rust 1.96.0 (pinned in `rust-toolchain.toml`)
+  targeting `wasm32v1-none`, produces one specific WASM binary with one
+  specific SHA-256 hash, deterministic for that source and toolchain (see
   [Verifying a deployment](README.md#verifying-a-deployment)).
 - Deploying that WASM (`make deploy IDENTITY=...` / `scripts/deploy.sh`)
   creates a contract at a new address — the `C...` address the deploy script
